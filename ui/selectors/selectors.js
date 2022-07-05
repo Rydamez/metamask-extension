@@ -823,8 +823,8 @@ function getAllowedAnnouncementIds(state) {
     7: false,
     8: supportsWebHid && currentKeyringIsLedger && currentlyUsingLedgerLive,
     9: getIsMainnet(state),
-    10: Boolean(process.env.TOKEN_DETECTION_V2) && !process.env.IN_TEST,
-    11: Boolean(process.env.TOKEN_DETECTION_V2) && !process.env.IN_TEST,
+    10: true,
+    11: true,
     12: true,
   };
 }
@@ -1033,7 +1033,7 @@ export const getTokenDetectionSupportNetworkByChainId = (state) => {
  * @param {*} state
  * @returns Boolean
  */
-export function getIsTokenDetectionSupported(state) {
+export function getIsDynamicTokenListAvailable(state) {
   const chainId = getCurrentChainId(state);
   return [
     MAINNET_CHAIN_ID,
@@ -1063,12 +1063,47 @@ export function getNewTokensImported(state) {
   return state.appState.newTokensImported;
 }
 
-/**
- * To get the `customNetworkListEnabled` value which determines whether we use the custom network list
+/** 
+ * To check if the token detection is OFF and the network is Mainnet
+ * so that the user can skip third party token api fetch
+ * and use the static tokenlist from contract-metadata
  *
  * @param {*} state
  * @returns Boolean
  */
-export function getIsCustomNetworkListEnabled(state) {
+export function getIsTokenDetectionInactiveOnMainnet(state) {
+  const isMainnet = getIsMainnet(state);
+  const useTokenDetection = getUseTokenDetection(state);
+
+  return !useTokenDetection && isMainnet;
+}
+
+/**
+ * To check for the chainId that supports token detection ,
+ * currently it returns true for Ethereum Mainnet, Polygon, BSC and Avalanche
+ *
+ * @param {*} state
+ * @returns Boolean
+ */
+export function getIsTokenDetectionSupported(state) {
+  const chainId = getCurrentChainId(state);
+  const useTokenDetection = getUseTokenDetection(state);
+  return (
+    useTokenDetection &&
+    [
+      MAINNET_CHAIN_ID,
+      BSC_CHAIN_ID,
+      POLYGON_CHAIN_ID,
+      AVALANCHE_CHAIN_ID,
+    ].includes(chainId)
+  );
+}
+
+/**
+ * To get the `customNetworkListEnabled` value which determines whether we use the custom network list
+ * @param {*} state
+ * @returns Boolean
+ */
+ export function getIsCustomNetworkListEnabled(state) {
   return state.metamask.customNetworkListEnabled;
 }

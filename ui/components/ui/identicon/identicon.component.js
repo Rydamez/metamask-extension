@@ -48,13 +48,13 @@ export default class Identicon extends PureComponent {
      */
     imageBorder: PropTypes.bool,
     /**
-     * Check if use token detection
+     * Check if token detection is OFF in Mainnet
      */
-    useTokenDetection: PropTypes.bool,
+    isTokenDetectionInactiveOnMainnet: PropTypes.bool,
     /**
      * Add list of token in object
      */
-    tokenList: PropTypes.object,
+    caseInSensitiveTokenList: PropTypes.object,
     /**
      * User preferred IPFS gateway
      */
@@ -69,7 +69,7 @@ export default class Identicon extends PureComponent {
     image: undefined,
     useBlockie: false,
     alt: '',
-    tokenList: {},
+    caseInSensitiveTokenList: {},
   };
 
   renderImage() {
@@ -105,8 +105,8 @@ export default class Identicon extends PureComponent {
       className,
       diameter,
       alt,
-      useTokenDetection,
-      tokenList,
+      caseInSensitiveTokenList,
+      isTokenDetectionInactiveOnMainnet,
     } = this.props;
     return (
       <Jazzicon
@@ -115,8 +115,8 @@ export default class Identicon extends PureComponent {
         className={classnames('identicon', className)}
         style={getStyles(diameter)}
         alt={alt}
-        useTokenDetection={useTokenDetection}
-        tokenList={tokenList}
+        caseInSensitiveTokenList={caseInSensitiveTokenList}
+        isTokenDetectionInactiveOnMainnet={isTokenDetectionInactiveOnMainnet}
       />
     );
   }
@@ -141,8 +141,8 @@ export default class Identicon extends PureComponent {
       useBlockie,
       addBorder,
       diameter,
-      useTokenDetection,
-      tokenList,
+      isTokenDetectionInactiveOnMainnet,
+      caseInSensitiveTokenList,
     } = this.props;
     const size = diameter + 8;
 
@@ -151,22 +151,14 @@ export default class Identicon extends PureComponent {
     }
 
     if (address) {
-      if (process.env.TOKEN_DETECTION_V2) {
-        if (tokenList[address.toLowerCase()]?.iconUrl) {
-          return this.renderJazzicon();
-        }
-      } else {
-        /** TODO: Remove during TOKEN_DETECTION_V2 feature flag clean up */
-        // token from dynamic api list is fetched when useTokenDetection is true
-        // And since the token.address from allTokens is checksumaddress
-        // tokenAddress have to be changed to lowercase when we are using dynamic list
-        const tokenAddress = useTokenDetection
-          ? address.toLowerCase()
-          : address;
-        if (tokenAddress && tokenList[tokenAddress]?.iconUrl) {
-          return this.renderJazzicon();
-        }
+      const tokenImagePath = isTokenDetectionInactiveOnMainnet
+        ? caseInSensitiveTokenList[address.toLowerCase()]?.logo
+        : caseInSensitiveTokenList[address.toLowerCase()]?.iconUrl;
+
+      if (tokenImagePath) {
+        return this.renderJazzicon();
       }
+
       return (
         <div
           className={classnames({ 'identicon__address-wrapper': addBorder })}
