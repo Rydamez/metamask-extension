@@ -54,6 +54,7 @@ export default class DetectTokensController {
     });
     this.hiddenTokens = this.tokensController?.state.ignoredTokens;
     this.detectedTokens = this.tokensController?.state.detectedTokens;
+    this.chainId = network?.store.getState().provider.chainId;
     this._trackMetaMetricsEvent = trackMetaMetricsEvent;
 
     preferences?.store.subscribe(({ selectedAddress, useTokenDetection }) => {
@@ -220,6 +221,12 @@ export default class DetectTokensController {
     }
     this._network = network;
     this.web3 = new Web3(network._provider);
+    this._network.store.subscribe(() => {
+      if (this.chainId !== network.store.getState().provider.chainId) {
+        this.restartTokenDetection();
+        this.chainId = network.store.getState().provider.chainId;
+      }
+    });
   }
 
   /**
