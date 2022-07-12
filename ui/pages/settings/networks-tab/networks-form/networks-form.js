@@ -572,7 +572,11 @@ const NetworksForm = ({
           error={errors.rpcUrl?.msg || ''}
           onChange={setRpcUrl}
           titleText={t('rpcUrl')}
-          value={rpcUrl}
+          value={
+            rpcUrl.includes('infura.io')
+              ? rpcUrl.substring(0, rpcUrl.indexOf('infura.io') + 9)
+              : rpcUrl
+          }
           disabled={viewOnly}
         />
         <FormField
